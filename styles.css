@@ -40,3 +40,27 @@
     margin-left: 3rem;
 }
 
+#restart{
+    background-color: red;
+    border-radius: 5px;
+    width: 12rem;
+    height: 3rem;
+    font-size: 1.5rem;
+    color: white;
+}
+
+#result{
+    text-align: center;
+    background-color: beige;
+    margin: 0;
+    min-height: 5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+#result-text{
+    margin: 0;
+}
+

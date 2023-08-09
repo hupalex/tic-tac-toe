@@ -1,8 +1,10 @@
 
 let cells = document.getElementsByClassName("field-row");
-
 let Gameboard = (() => {
+    let active = 0;
     let gameboard = ["","","","","","","","",""];
+    let someoneWon = 0;
+    let resultText = document.getElementById("result-text");
     const winnerCombos = [
         [0,1,2],
         [3,4,5],
@@ -13,11 +15,19 @@ let Gameboard = (() => {
         [1,4,7],
         [2,5,8]
     ];
-    let clearBoard = () => {
-        for (let i = 0; i < cells.length; i++) {
-            gameboard = [];
-            cells[i].textContent = "";               
-        }
+    let ClearBoard = () => {
+        let restartButton = document.getElementById("restart");
+        restartButton.addEventListener("click", function(){
+            for (let i = 0; i < gameboard.length; i++) {
+                cells[i].textContent = "";
+                gameboard = ["","","","","","","","",""];  
+                active = 0;   
+                playerOne.activePlayerColor("yellow");
+                playerTwo.activePlayerColor("black");
+                resultText.textContent ="Waiting for the winner..."
+            }
+        })
+        
     };
     let GetWinner = () => {
         winnerCombos.forEach(function(row) {
@@ -26,53 +36,61 @@ let Gameboard = (() => {
             let c = row[2];
             if(gameboard[a]!=="" && gameboard[a]===gameboard[b] && gameboard[b]===gameboard[c])
               if (gameboard[a] === "X") {
-                console.log(`${playerOne.playerName} won!`);
-              } else console.log(`${playerTwo.playerName} won!`);
+                someoneWon = 1;
+                resultText.textContent = `${playerOne.playerName} won!`;
+              } else {
+                someoneWon = 1;
+                resultText.textContent = `${playerTwo.playerName} won!`;
+              } else someoneWon = 0;
           });
     }
 
-    let gameController = () => {
-        console.log(Object.values(gameboard).length === gameboard.length)
-        if (gameboard.every(el => el !== "")) {
-             console.log("Gameover! It's a tie!");       
-
+    let gameController = () => {  
+        if (gameboard.every(el => el !== "") && someoneWon === 0) {
+            resultText.textContent = "It's a tie...";
+                
         } else {
             GetWinner();
         }
+        ClearBoard();
     };
     let putPlaceMark = () => {
         playerOne.activePlayerColor("yellow");
         for (let i = 0; i < cells.length; i++) { 
-            cells[i].addEventListener("click", function() {               
+            cells[i].addEventListener("click", function() {             
                 if(gameboard[i] === ""){
-                    if(playerSwitch === 0){                     
+                    if(active === 0){                       
                         gameboard[i]= playerOne.playerMark;
-                        playerSwitch = 1;
                         playerOne.activePlayerColor("black");
                         playerTwo.activePlayerColor("yellow");
-                    } else {
+                        active = 1;
+                    } else if (active === 1) {
                         gameboard[i] = playerTwo.playerMark;
-                        playerSwitch = 0;
                         playerOne.activePlayerColor("yellow");
                         playerTwo.activePlayerColor("black");
+                        active = 0;
                     } 
-                }                            
-                cells[i].textContent = Gameboard.gameboard[i];
-                gameController();     
+                } else return                      
+                
+                console.log(active)
+                console.log(gameboard);
+                console.log(cells[i]);
+                cells[i].textContent = gameboard[i];
+                gameController();
             })
+            
         }
     }
-    return {gameboard, putPlaceMark};
+    return {gameboard, putPlaceMark, ClearBoard, active, gameController};
 })();
 
 let Players = (number, name, mark) => {   
     let playerNameDisplay = document.getElementById(`player${number}`);
     playerNameDisplay.textContent = name;
-    playerSwitch = 0;
     let playerMark = mark; 
     let playerName = name;
     let activePlayerColor = (color) =>{
-        if (playerSwitch === 0) {
+        if (Gameboard.active === 0) {
             playerNameDisplay.setAttribute("style", `color: ${color};`);           
         } else {
             playerNameDisplay.setAttribute("style", `color: ${color};`);  
@@ -80,7 +98,7 @@ let Players = (number, name, mark) => {
 
     }
 
-    return {playerNameDisplay, playerMark, activePlayerColor, playerSwitch, playerName}
+    return {playerNameDisplay, playerMark, activePlayerColor, playerName}
 }
 const playerOne = Players(1, "Alex", "X");
 const playerTwo = Players(2, "OtherPlayer", "O"); 

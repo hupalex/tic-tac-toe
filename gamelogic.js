@@ -4,6 +4,7 @@ let Gameboard = (() => {
     let active = 0;
     let gameboard = ["","","","","","","","",""];
     let someoneWon = 0;
+    let disableMarking = 0;
     let resultText = document.getElementById("result-text");
     const winnerCombos = [
         [0,1,2],
@@ -25,40 +26,44 @@ let Gameboard = (() => {
                 playerOne.activePlayerColor("yellow");
                 playerTwo.activePlayerColor("black");
                 resultText.textContent ="Waiting for the winner..."
+                someoneWon = 0;
+                disableMarking = 0;
             }
-        })
-        
+        })    
     };
     let GetWinner = () => {
         winnerCombos.forEach(function(row) {
             let a = row[0];
             let b = row[1];
             let c = row[2];
-            if(gameboard[a]!=="" && gameboard[a]===gameboard[b] && gameboard[b]===gameboard[c])
+            if(gameboard[a]!=="" && gameboard[a]===gameboard[b] && gameboard[b]===gameboard[c]){   
+                someoneWon = 1;     
               if (gameboard[a] === "X") {
-                someoneWon = 1;
                 resultText.textContent = `${playerOne.playerName} won!`;
+                disableMarking = 1;
+                console.log(someoneWon)
               } else {
-                someoneWon = 1;
                 resultText.textContent = `${playerTwo.playerName} won!`;
-              } else someoneWon = 0;
+                disableMarking = 1;
+              }
+            } else someoneWon = 0;
           });
-    }
-
+    };
+    
     let gameController = () => {  
         if (gameboard.every(el => el !== "") && someoneWon === 0) {
             resultText.textContent = "It's a tie...";
-                
-        } else {
-            GetWinner();
-        }
+            disableMarking = 1;
+            console.log(someoneWon);
+        } 
+        GetWinner();
         ClearBoard();
     };
     let putPlaceMark = () => {
         playerOne.activePlayerColor("yellow");
         for (let i = 0; i < cells.length; i++) { 
             cells[i].addEventListener("click", function() {             
-                if(gameboard[i] === ""){
+                if(gameboard[i] === "" && disableMarking === 0){
                     if(active === 0){                       
                         gameboard[i]= playerOne.playerMark;
                         playerOne.activePlayerColor("black");
@@ -70,20 +75,14 @@ let Gameboard = (() => {
                         playerTwo.activePlayerColor("black");
                         active = 0;
                     } 
-                } else return                      
-                
-                console.log(active)
-                console.log(gameboard);
-                console.log(cells[i]);
+                } else return                                    
                 cells[i].textContent = gameboard[i];
                 gameController();
-            })
-            
+            })      
         }
     }
     return {gameboard, putPlaceMark, ClearBoard, active, gameController};
 })();
-
 let Players = (number, name, mark) => {   
     let playerNameDisplay = document.getElementById(`player${number}`);
     playerNameDisplay.textContent = name;
@@ -95,11 +94,9 @@ let Players = (number, name, mark) => {
         } else {
             playerNameDisplay.setAttribute("style", `color: ${color};`);  
         }
-
     }
-
     return {playerNameDisplay, playerMark, activePlayerColor, playerName}
-}
+};
 const playerOne = Players(1, "Alex", "X");
 const playerTwo = Players(2, "OtherPlayer", "O"); 
 Gameboard.putPlaceMark();
